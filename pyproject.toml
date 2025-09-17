@@ -1,0 +1,16 @@
+[project]
+name = "dvc-pipeline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dvclive>=3.48.5",
+    "matplotlib>=3.10.6",
+    "mlflow>=3.3.2",
+    "pandas>=2.3.2",
+    "pyaml>=25.7.0",
+    "scikit-learn>=1.7.2",
+    "scipy>=1.16.2",
+    "seaborn>=0.13.2",
+]
