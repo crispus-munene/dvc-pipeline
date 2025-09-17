@@ -1,0 +1,20 @@
+stages:
+  download:
+    cmd: kaggle datasets download -d uciml/german-credit -p data && unzip -o data/german-credit.zip -d data
+    outs:
+      - data/german_credit_data.csv
+
+  train:
+    cmd: python main.py
+    deps:
+      - src/data_loading.py
+      - src/preprocessing.py
+      - src/splitting.py
+      - src/training.py
+      - src/utils.py
+      - params.yaml
+      - data/german_credit_data.csv
+    outs:
+      - outputs/metrics
+      - outputs/confusion_matrices
+      - outputs/dvclive

@@ -9,3 +9,5 @@ wheels/
 # Virtual environments
 .venv
 .dvc
+/confusion_matrix.png
+/metrics.json

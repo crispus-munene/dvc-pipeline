@@ -5,9 +5,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import logging
-from dvclive import Live
+import dvclive
+import os
+from datetime import datetime
 
-from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, precision_score
+from sklearn.metrics import (
+    confusion_matrix, accuracy_score, recall_score, precision_score, f1_score
+)
 from mlflow.tracking import MlflowClient
 
 from data_loading import load_data
@@ -29,9 +33,19 @@ def train_and_log(params):
     run_name = params["mlflow"]["run_name"]
     artifact_path = params["mlflow"]["artifact_path"]
 
+    # --- Prepare output dirs ---
+    os.makedirs("outputs/metrics", exist_ok=True)
+    os.makedirs("outputs/confusion_matrices", exist_ok=True)
+    os.makedirs("outputs/dvclive", exist_ok=True)
+
+    # Unique suffix per run
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
     # --- Data ---
     df = load_data(params["data"]["path"])
-    X_train, X_test, y_train, y_test = train_test_split_data(df, test_size=params["data"]["test_size"])
+    X_train, X_test, y_train, y_test = train_test_split_data(
+        df, test_size=params["data"]["test_size"]
+    )
 
     categorical_cols = X_train.select_dtypes(include="O").columns.tolist()
     numeric_cols = X_train.select_dtypes(exclude="O").columns.tolist()
@@ -42,9 +56,17 @@ def train_and_log(params):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-        acc = accuracy_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
+        # Dynamically evaluate metrics
+        metrics = {}
+        for metric in params["model"]["metrics"]:
+            if metric == "accuracy":
+                metrics["accuracy"] = accuracy_score(y_test, y_pred)
+            elif metric == "precision":
+                metrics["precision"] = precision_score(y_test, y_pred)
+            elif metric == "recall":
+                metrics["recall"] = recall_score(y_test, y_pred)
+            elif metric == "f1":
+                metrics["f1"] = f1_score(y_test, y_pred)
 
         # Confusion Matrix
         df_cm = pd.DataFrame(
@@ -53,31 +75,34 @@ def train_and_log(params):
             index=np.unique(y_test)
         )
         sns.heatmap(df_cm, cmap="Blues", annot=True)
-        plt.savefig("confusion_matrix.png")
+        cm_path = f"outputs/confusion_matrices/confusion_matrix_{timestamp}.png"
+        plt.savefig(cm_path)
         plt.close()
 
-        # Save metrics
-        metrics = {"accuracy": acc, "recall": recall, "precision": precision}
-        with open("metrics.json", "w") as f:
+        # Save metrics JSON
+        metrics_path = f"outputs/metrics/metrics_{timestamp}.json"
+        with open(metrics_path, "w") as f:
             json.dump(metrics, f)
 
-        # --- DVC Live logging ---
-        Live.log_metric("accuracy", acc)
-        Live.log_metric("recall", recall)
-        Live.log_metric("precision", precision)
-        Live.log_image("confusion_matrix.png", "confusion matrix")
+        # DVCLive logging
+        with dvclive.Live("outputs/dvclive", report=None) as live:
+            for k, v in metrics.items():
+                live.log_metric(k, v)
+            live.next_step()
 
-        # Log params & artifacts
+        # MLflow logging
         run_id = mlflow.active_run().info.run_id
         mlflow.sklearn.log_model(sk_model=model, artifact_path=artifact_path)
         mlflow.log_params(params["model"])
         mlflow.log_metrics(metrics)
-        mlflow.log_artifact("confusion_matrix.png")
-        mlflow.log_artifact("metrics.json")
+        mlflow.log_artifact(cm_path)
+        mlflow.log_artifact(metrics_path)
 
         # Register + promote to production
         model_uri = f"runs:/{run_id}/{artifact_path}"
-        model_details = mlflow.register_model(model_uri=model_uri, name=params["model"]["name"])
+        model_details = mlflow.register_model(
+            model_uri=model_uri, name=params["model"]["name"]
+        )
         client.transition_model_version_stage(
             name=model_details.name,
             version=model_details.version,

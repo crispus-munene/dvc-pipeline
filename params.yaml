@@ -1,0 +1,19 @@
+data:
+  path: data/german_credit_data.csv
+  test_size: 0.2
+
+mlflow:
+  tracking_uri: sqlite:///mlruns.db
+  experiment_name: german_credit_experiment
+  run_name: baseline_run
+  artifact_path: model
+
+model:
+  name: svm_classifier
+  type: SVC
+  kernel: rbf
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1

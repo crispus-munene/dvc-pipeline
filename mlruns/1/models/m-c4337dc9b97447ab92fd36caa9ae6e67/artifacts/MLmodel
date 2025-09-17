@@ -1,0 +1,22 @@
+artifact_path: file:C:/Users/mwang/Desktop/ml/dvc-pipeline/mlruns/1/models/m-c4337dc9b97447ab92fd36caa9ae6e67/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.6
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.3.2
+model_id: m-c4337dc9b97447ab92fd36caa9ae6e67
+model_size_bytes: 118492
+model_uuid: m-c4337dc9b97447ab92fd36caa9ae6e67
+prompts: null
+run_id: a895d4be86014e7a9d8258c2dfed3a9f
+utc_time_created: '2025-09-17 06:59:01.746381'
