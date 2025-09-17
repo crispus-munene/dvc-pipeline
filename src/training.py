@@ -14,10 +14,10 @@ from sklearn.metrics import (
 )
 from mlflow.tracking import MlflowClient
 
-from data_loading import load_data
-from splitting import train_test_split_data
-from preprocessing import build_pipeline
-from utils import load_params
+from src.data_loading import load_data
+from src.splitting import train_test_split_data
+from src.preprocessing import build_pipeline
+from src.utils import load_params
 
 
 def train_and_log(params):

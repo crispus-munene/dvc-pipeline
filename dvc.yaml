@@ -7,16 +7,24 @@ stages:
   train:
     cmd: python main.py
     deps:
-      - src/data_loading.py
-      - src/preprocessing.py
-      - src/splitting.py
-      - src/training.py
-      - src/utils.py
-      - params.yaml
-      - data/german_credit_data.csv
+    - src/data_loading.py
+    - src/preprocessing.py
+    - src/splitting.py
+    - src/training.py
+    - src/utils.py
+    - params.yaml
+    - data/german_credit_data.csv
     outs:
-      - outputs/metrics
-      - outputs/confusion_matrices
-      - outputs/dvclive
+    - outputs/metrics
+    - outputs/confusion_matrices
+    - outputs/dvclive
 
 
+metrics:
+- outputs/dvclive/metrics.json
+- outputs/dvclive/metrics.json
+plots:
+- outputs/dvclive/plots/metrics:
+    x: step
+- outputs/dvclive/plots/metrics:
+    x: step
