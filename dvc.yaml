@@ -1,8 +1,8 @@
 stages:
-  download:
-    cmd: kaggle datasets download -d uciml/german-credit -p data && unzip -o data/german-credit.zip -d data
-    outs:
-      - data/german_credit_data.csv
+  # download:
+  #   cmd: kaggle datasets download -d uciml/german-credit -p data && unzip -o data/german-credit.zip -d data
+  #   outs:
+  #     - data/german_credit_data.csv
 
   train:
     cmd: python main.py
@@ -18,3 +18,5 @@ stages:
       - outputs/metrics
       - outputs/confusion_matrices
       - outputs/dvclive
+
+
